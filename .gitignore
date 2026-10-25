@@ -1,27 +1,10 @@
-# Maven build output
 target/
-
-# IntelliJ IDEA
 .idea/
 *.iml
-*.iws
-*.ipr
-
-# Java
-*.class
-hs_err_pid*
-
-# Local environment and secrets
-.env
-.env.*
-!.env.example
-
-# Logs and temporary files
-*.log
-*.tmp
-*.swp
-*.swo
-
-# Operating system files
+.vscode/
+.classpath
+.project
+.settings/
 .DS_Store
-Thumbs.db
+*.class
+*.log
