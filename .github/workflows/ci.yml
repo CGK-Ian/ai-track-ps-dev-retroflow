@@ -11,14 +11,14 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
+      issues: write
 
     steps:
       - name: Check out source code
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
 
       - name: Set up Java 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961
         with:
           distribution: temurin
           java-version: '21'
@@ -29,7 +29,7 @@ jobs:
 
       - name: Extract JaCoCo coverage percentage
         id: coverage
-        if: ${{ always() && github.event_name == 'pull_request' && hashFiles('target/site/jacoco/jacoco.xml') != '' }}
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always() && hashFiles('target/site/jacoco/jacoco.xml') != '' }}
         shell: bash
         run: |
           python - <<'PY'
@@ -55,14 +55,13 @@ jobs:
           PY
 
       - name: Fail the build if coverage is below 80%
-        if: ${{ always() && github.event_name == 'pull_request' && steps.coverage.outputs.percentage != '' }}
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always() && steps.coverage.outputs.percentage != '' }}
         env:
           COVERAGE_PERCENTAGE: ${{ steps.coverage.outputs.percentage }}
         shell: bash
         run: |
           python - <<'PY'
           import os
-          import sys
 
           percentage = float(os.environ['COVERAGE_PERCENTAGE'])
           if percentage < 80.0:
@@ -72,8 +71,8 @@ jobs:
           PY
 
       - name: Comment coverage on pull request
-        if: ${{ always() && github.event_name == 'pull_request' && steps.coverage.outputs.percentage != '' }}
-        uses: actions/github-script@v8
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always() && steps.coverage.outputs.percentage != '' }}
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const percentage = '${{ steps.coverage.outputs.percentage }}';
