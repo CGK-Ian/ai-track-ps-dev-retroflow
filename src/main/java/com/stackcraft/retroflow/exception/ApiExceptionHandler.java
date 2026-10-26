@@ -6,7 +6,11 @@ import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.method.annotation.HandlerMethodValidationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -31,12 +35,20 @@ public class ApiExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", exception.getMessage());
     }
 
+    @ExceptionHandler({HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class,
+            HandlerMethodValidationException.class})
+    public ResponseEntity<ErrorMessage> handleBadRequest(Exception exception) {
+        return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Invalid request: " + exception.getMessage());
+    }
+
     @ExceptionHandler(RetroflowException.class)
     public ResponseEntity<ErrorMessage> handleBusinessRule(RetroflowException exception) {
         return error(HttpStatus.BAD_REQUEST, "BUSINESS_RULE_VIOLATION", exception.getMessage());
     }
 
-    @ExceptionHandler({EntityNotFoundException.class, NoSuchElementException.class})
+    @ExceptionHandler({NotFoundException.class, EntityNotFoundException.class, NoSuchElementException.class})
     public ResponseEntity<ErrorMessage> handleNotFound(RuntimeException exception) {
         return error(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage());
     }

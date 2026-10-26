@@ -208,10 +208,36 @@ Use `curl.exe` in Windows PowerShell. Expected responses:
 These are reachability checks, **not business API tests or a health contract**.
 Postman, Insomnia, or VS Code REST Client can send the same requests.
 
-Do not assume routes such as `/api/teams` exist. Until the controller is
-implemented, use the service tests to exercise business behavior. When adding
-endpoints, add controller tests and a checked-in `.http` collection with request
-bodies, expected statuses, and a complete team-to-retrospective workflow.
+## REST API
+
+Controllers: `TeamController`, `RetrospectiveController`, `FeedbackItemController`
+(contract tests in `src/test/java/.../controller`, mocked services, no database).
+
+| # | Endpoint | Success |
+| --- | --- | --- |
+| 1 | `POST /api/teams` | 201 |
+| 2 | `GET /api/teams` (paged) | 200 |
+| 3 | `GET /api/teams/{id}` | 200 |
+| 4 | `POST /api/teams/{teamId}/retrospectives` | 201 |
+| 5 | `GET /api/teams/{teamId}/retrospectives?email=` (paged) | 200 |
+| 6 | `GET /api/retrospectives?id=&title=&status=` (paged) | 200 |
+| 7 | `GET /api/retrospectives/{id}` | 200 |
+| 8 | `PUT /api/retrospectives/{id}/close?email=` | 204 |
+| 9 | `POST /api/retrospectives/{retrospectiveId}/feedbackItems` | 201 |
+| 10 | `GET /api/retrospectives/{retrospectiveId}/feedbackItems?priority=&completed=` (paged) | 200 |
+| 11 | `GET .../feedbackItems/{feedbackItemId}` | 200 |
+| 12 | `PUT .../feedbackItems/{feedbackItemId}` | 200 |
+| 13 | `DELETE .../feedbackItems/{feedbackItemId}?email=` | 204 |
+| 14 | `PUT .../feedbackItems/{feedbackItemId}/complete?email=` | 200 |
+
+- Actor `email` is in the body for POST and PUT with a body, otherwise a required `email` query parameter.
+- Paging: `pageNumber` (default 0), `pageSize` (default 20, max 100); response `{ "items": [...], "paging": { "totalItems": n } }`.
+- Enum values (status, type, priority) are case-insensitive.
+- Errors: `{ "code", "description" }` with 400 (`VALIDATION_ERROR`, `BUSINESS_RULE_VIOLATION`, `DATA_CONFLICT`), 404 (`NOT_FOUND`) and 501 (`NOT_IMPLEMENTED`, while services are stubbed).
+
+Note: the controllers require service methods (including a `FeedbackItemService`)
+that are not yet implemented, so the application does not compile until the
+service layer is added.
 
 ## Faster development loop
 
