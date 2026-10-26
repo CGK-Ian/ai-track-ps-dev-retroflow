@@ -154,7 +154,7 @@ Run commands from the repository root. Tests use JUnit 5, AssertJ, and
 | Run the same verification as CI | `mvn -B verify` |
 | Remove old build output and verify | `mvn clean verify` |
 
-The four tests in
+The eight tests in
 [RetroflowBusinessRulesTest](src/test/java/com/stackcraft/retroflow/RetroflowBusinessRulesTest.java)
 currently cover:
 
@@ -162,11 +162,25 @@ currently cover:
 - A team cannot have two open retrospectives.
 - A completed action item cannot be marked incomplete.
 - Created teams, retrospectives, feedback, and action items retain their details.
+- Incomplete action items remain incomplete when uncompleted.
+- Missing teams, retrospectives, and action items produce domain errors.
 
 `mvn verify` generates a JaCoCo report at `target/site/jacoco/index.html` and
 enforces **at least 80% overall line coverage**. `mvn test` runs the tests but
 does not generate that report or enforce the coverage threshold. Test results
 are written to `target/surefire-reports`.
+
+PIT mutation testing is configured for the service package and runs the passing
+`RetroflowBusinessRulesTest` suite. Run it with JDK 21, like the other project
+commands:
+
+```text
+mvn -q org.pitest:pitest-maven:1.30.1:mutationCoverage
+```
+
+PIT writes its HTML/XML output under `target/pit-reports`; the checked-in
+[mutation report](PIT-MUTATION-REPORT.md) records the measured baseline and
+final scores and the remaining mutations.
 
 The [CI workflow](.github/workflows/ci.yml) uses Java 21 and `mvn -B verify`.
 Run that command before opening a pull request. The existing tests exercise the
