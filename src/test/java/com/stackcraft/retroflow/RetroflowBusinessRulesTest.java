@@ -76,4 +76,32 @@ class RetroflowBusinessRulesTest {
         ).isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class);
     }
 
+    @Test
+    void createdItems_retainTheirDetails() {
+        Team team = teamService.createTeam("Team Delta", java.util.List.of("Grace", "Heidi"));
+        Retrospective retro = retrospectiveService.createRetrospective(team.getId(), "Sprint 3 Retro");
+
+        assertThat(team.getName()).isEqualTo("Team Delta");
+        assertThat(team.getMembers()).containsExactly("Grace", "Heidi");
+        assertThat(retro.getTitle()).isEqualTo("Sprint 3 Retro");
+        assertThat(retro.getTeam().getId()).isEqualTo(team.getId());
+
+        FeedbackItem feedback = retrospectiveService.addFeedbackItem(
+            retro.getId(), "Clear communication", "WENT_WELL", "Grace");
+        assertThat(feedback.getId()).isNotNull();
+        assertThat(feedback.getContent()).isEqualTo("Clear communication");
+        assertThat(feedback.getType()).isEqualTo("WENT_WELL");
+        assertThat(feedback.getSubmittedBy()).isEqualTo("Grace");
+        assertThat(feedback.getRetrospective().getId()).isEqualTo(retro.getId());
+
+        ActionItem actionItem = retrospectiveService.addActionItem(
+            retro.getId(), "Document the release", "MEDIUM", "Heidi");
+        assertThat(actionItem.getId()).isNotNull();
+        assertThat(actionItem.getDescription()).isEqualTo("Document the release");
+        assertThat(actionItem.getPriority()).isEqualTo("MEDIUM");
+        assertThat(actionItem.getAssignee()).isEqualTo("Heidi");
+        assertThat(actionItem.isCompleted()).isFalse();
+        assertThat(actionItem.getRetrospective().getId()).isEqualTo(retro.getId());
+    }
+
 }
