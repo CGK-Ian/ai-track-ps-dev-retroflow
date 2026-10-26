@@ -8,6 +8,8 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 
+import java.time.LocalDate;
+
 /**
  * STUB — left behind by the previous vendor.
  *
@@ -32,6 +34,8 @@ public class Retrospective {
 
     private String title;
 
+    private LocalDate date;
+
     @ManyToOne(optional = false)
     private Team team;
 
@@ -52,6 +56,14 @@ public class Retrospective {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public Team getTeam() {

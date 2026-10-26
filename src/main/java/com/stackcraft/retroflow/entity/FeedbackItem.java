@@ -1,6 +1,8 @@
 package com.stackcraft.retroflow.entity;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,6 +35,14 @@ public class FeedbackItem {
     private String type;
 
     private String submittedBy;
+
+    @ManyToOne
+    private TeamMember submitter;
+
+    @Enumerated(EnumType.STRING)
+    private ActionPriority priority;
+
+    private boolean completed;
 
     @ManyToOne(optional = false)
     private Retrospective retrospective;
@@ -67,6 +77,30 @@ public class FeedbackItem {
 
     public void setSubmittedBy(String submittedBy) {
         this.submittedBy = submittedBy;
+    }
+
+    public TeamMember getSubmitter() {
+        return submitter;
+    }
+
+    public void setSubmitter(TeamMember submitter) {
+        this.submitter = submitter;
+    }
+
+    public ActionPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(ActionPriority priority) {
+        this.priority = priority;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
 
     public Retrospective getRetrospective() {

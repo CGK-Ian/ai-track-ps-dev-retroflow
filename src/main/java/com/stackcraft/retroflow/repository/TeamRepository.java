@@ -10,4 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * methods here as the service layer needs them.
  */
 public interface TeamRepository extends JpaRepository<Team, Long> {
+    boolean existsByName(String name);
+
+    boolean existsByTeamMembers_EmailIgnoreCase(String email);
 }

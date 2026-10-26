@@ -7,6 +7,7 @@ import com.stackcraft.retroflow.entity.FeedbackItem;
 import com.stackcraft.retroflow.entity.Retrospective;
 import com.stackcraft.retroflow.entity.RetrospectiveStatus;
 import com.stackcraft.retroflow.entity.Team;
+import com.stackcraft.retroflow.entity.TeamMember;
 import com.stackcraft.retroflow.exception.RetroflowException;
 import jakarta.persistence.EntityNotFoundException;
 import com.stackcraft.retroflow.repository.ActionItemRepository;
@@ -51,6 +52,7 @@ class RetrospectiveServiceTest {
         team = new Team();
         team.setId(23L);
         team.setName("Team-Alpha");
+        team.addTeamMember(new TeamMember(1L, "Alice", "alice@example.com", team));
     }
 
     @Test
@@ -83,7 +85,7 @@ class RetrospectiveServiceTest {
         });
 
         RetrospectiveResponse created = retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, null));
+            23L, new CreateRetrospectiveRequest("Sprint 1", null, "alice@example.com"));
 
         assertThat(created).isEqualTo(new RetrospectiveResponse(
             41L, "Sprint 1", LocalDate.now(), RetrospectiveStatus.OPEN, 23L));
@@ -103,7 +105,7 @@ class RetrospectiveServiceTest {
             LocalDate.now().minusDays(10), LocalDate.now(), LocalDate.now().plusDays(10)
         }) {
             RetrospectiveResponse created = retrospectiveService.createRetrospective(
-                23L, new CreateRetrospectiveRequest("Sprint 1", date, null));
+                23L, new CreateRetrospectiveRequest("Sprint 1", date, "alice@example.com"));
 
             assertThat(created.date()).isEqualTo(date);
             assertThat(created.title()).isEqualTo("Sprint 1");
@@ -112,13 +114,13 @@ class RetrospectiveServiceTest {
     }
 
     @Test
-    void createRetrospectiveRequest_acceptsStatusWithoutCaseSensitivity() {
+    void createRetrospectiveRequest_matchesMemberEmailWithoutCaseSensitivity() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
         when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
         when(retrospectiveRepository.save(any(Retrospective.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RetrospectiveResponse created = retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", LocalDate.of(2026, 10, 26), "open"));
+            23L, new CreateRetrospectiveRequest("Sprint 1", LocalDate.of(2026, 10, 26), "ALICE@example.com"));
 
         assertThat(created.status()).isEqualTo(RetrospectiveStatus.OPEN);
         assertThat(created.date()).isEqualTo(LocalDate.of(2026, 10, 26));
@@ -126,27 +128,23 @@ class RetrospectiveServiceTest {
     }
 
     @Test
-    void createRetrospectiveRequest_rejectsUnknownStatus() {
+    void createRetrospectiveRequest_rejectsEmailOutsideTheTeam() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
-        when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, "UNKNOWN")))
+            23L, new CreateRetrospectiveRequest("Sprint 1", null, "stranger@example.com")))
             .isInstanceOf(RetroflowException.class);
 
         verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
 
     @Test
-    void createRetrospectiveRequest_rejectsInitialClosedStatus() {
-        when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
-        when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
+    void createRetrospectiveRequest_throwsNotFoundForMissingTeam() {
+        when(teamRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, "CLOSED")))
-            .isInstanceOf(RetroflowException.class);
-
-        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
+            404L, new CreateRetrospectiveRequest("Sprint 1", null, "alice@example.com")))
+            .isInstanceOf(com.stackcraft.retroflow.exception.NotFoundException.class);
     }
 
     @Test

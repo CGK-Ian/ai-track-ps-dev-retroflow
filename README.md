@@ -233,11 +233,9 @@ Controllers: `TeamController`, `RetrospectiveController`, `FeedbackItemControlle
 - Actor `email` is in the body for POST and PUT with a body, otherwise a required `email` query parameter.
 - Paging: `pageNumber` (default 0), `pageSize` (default 20, max 100); response `{ "items": [...], "paging": { "totalItems": n } }`.
 - Enum values (status, type, priority) are case-insensitive.
-- Errors: `{ "code", "description" }` with 400 (`VALIDATION_ERROR`, `BUSINESS_RULE_VIOLATION`, `DATA_CONFLICT`), 404 (`NOT_FOUND`) and 501 (`NOT_IMPLEMENTED`, while services are stubbed).
-
-Note: the controllers require service methods (including a `FeedbackItemService`)
-that are not yet implemented, so the application does not compile until the
-service layer is added.
+- Errors: `{ "code", "description" }` with 400 (`VALIDATION_ERROR`, `BUSINESS_RULE_VIOLATION`, `DATA_CONFLICT`) and 404 (`NOT_FOUND`).
+- Controllers call the real `TeamService`, `RetrospectiveService` and `FeedbackItemService`;
+  `RetroflowApiIntegrationTest` exercises the whole flow against the in-memory database.
 
 ## Faster development loop
 
