@@ -1,9 +1,11 @@
 package com.stackcraft.retroflow.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.NotNull;
 
 /**
  * STUB — left behind by the previous vendor.
@@ -20,18 +22,47 @@ import jakarta.persistence.Id;
  * been decided yet; this is deliberately just a bare stub.
  */
 @Entity
-public class ActionItem {
+@DiscriminatorValue("ACTION_ITEM")
+public class ActionItem extends FeedbackItem {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ActionPriority priority;
 
-    public Long getId() {
-        return id;
+    @Column(nullable = false)
+    private boolean completed = false;
+
+    public ActionItem() {
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public ActionItem(Long id, String content, TeamMember submitter, Retrospective retrospective,
+                      ActionPriority priority, boolean completed) {
+        super(id, content, FeedbackType.ACTION_ITEM, submitter, retrospective);
+        this.priority = priority;
+        this.completed = completed;
     }
 
+    public ActionItem(Long id, String content, FeedbackType type, TeamMember submitter,
+                      Retrospective retrospective, ActionPriority priority, boolean completed) {
+        super(id, content, type, submitter, retrospective);
+        this.priority = priority;
+        this.completed = completed;
+    }
+
+    public ActionPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(ActionPriority priority) {
+        this.priority = priority;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }

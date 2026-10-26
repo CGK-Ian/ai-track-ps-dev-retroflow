@@ -24,6 +24,7 @@ This document records the decisions made to resolve ambiguities in the RetroFlow
 ## Feedback and Action Items
 
 - Feedback cannot be added to a closed retrospective.
+- A feedback item's submitter is stored as the ID/reference of the corresponding team member, not as an email string. If the request supplies the submitter's email, resolve it to a member of the retrospective's team and persist that member as the submitter.
 - Feedback items may be deleted only while their retrospective is open.
 - An action item must always have a priority.
 - An action item can be fully edited while it is incomplete, even if its parent retrospective is closed.
