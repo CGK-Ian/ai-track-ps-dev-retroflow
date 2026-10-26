@@ -1,5 +1,7 @@
 package com.stackcraft.retroflow.service;
 
+import com.stackcraft.retroflow.dto.CreateTeamRequest;
+import com.stackcraft.retroflow.dto.TeamResponse;
 import com.stackcraft.retroflow.entity.Team;
 import com.stackcraft.retroflow.exception.RetroflowException;
 import com.stackcraft.retroflow.repository.TeamRepository;
@@ -28,5 +30,13 @@ public class TeamService {
         team.setName(name);
         team.setMembers(List.copyOf(members));
         return teamRepository.save(team);
+    }
+
+    public TeamResponse createTeam(CreateTeamRequest request) {
+        throw new UnsupportedOperationException("Team creation has not been implemented yet");
+    }
+
+    public TeamResponse getTeam(Long teamId) {
+        throw new UnsupportedOperationException("Team retrieval has not been implemented yet");
     }
 }

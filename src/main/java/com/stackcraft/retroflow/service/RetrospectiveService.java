@@ -1,5 +1,7 @@
 package com.stackcraft.retroflow.service;
 
+import com.stackcraft.retroflow.dto.CreateRetrospectiveRequest;
+import com.stackcraft.retroflow.dto.RetrospectiveResponse;
 import com.stackcraft.retroflow.entity.ActionItem;
 import com.stackcraft.retroflow.entity.FeedbackItem;
 import com.stackcraft.retroflow.entity.Retrospective;
@@ -11,6 +13,8 @@ import com.stackcraft.retroflow.repository.RetrospectiveRepository;
 import com.stackcraft.retroflow.repository.TeamRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional
@@ -90,6 +94,14 @@ public class RetrospectiveService {
         }
         item.setCompleted(false);
         return actionItemRepository.save(item);
+    }
+
+    public RetrospectiveResponse createRetrospective(Long teamId, CreateRetrospectiveRequest request) {
+        throw new UnsupportedOperationException("Retrospective creation has not been implemented yet");
+    }
+
+    public List<RetrospectiveResponse> getRetrospectivesForTeam(Long teamId) {
+        throw new UnsupportedOperationException("Retrospective retrieval has not been implemented yet");
     }
 
     private Retrospective requireOpenRetrospective(Long retrospectiveId) {
