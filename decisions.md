@@ -45,4 +45,3 @@ This document records the decisions made to resolve ambiguities in the RetroFlow
 
 - In-memory persistence is acceptable for the current project scope.
 - The README should be updated to reflect the actual requirements and setup.
-

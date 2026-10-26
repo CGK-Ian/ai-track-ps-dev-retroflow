@@ -1,56 +1,36 @@
 package com.stackcraft.retroflow.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.persistence.JoinColumn;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * STUB — left behind by the previous vendor.
+ *
+ * A Team has a name and a list of members (member names only, no
+ * authentication) and must have at least one member. See the RetroFlow
+ * brief for the full requirements — fields, validation, and relationships
+ * to Retrospective still need to be designed and implemented.
+ */
 @Entity
-@Table(name = "teams")
 public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 5, max = 255)
-    @Pattern(regexp = "^[A-Za-z0-9-]+$")
-    @Column(nullable = false, unique = true, length = 255)
     private String name;
 
-    @Valid
-    @NotEmpty
-    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE}, orphanRemoval = true)
-    private List<TeamMember> members = new ArrayList<>();
-
-    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<Retrospective> retrospectives = new ArrayList<>();
-
-    public Team() {
-    }
-
-    public Team(Long id, String name, List<TeamMember> members, List<Retrospective> retrospectives) {
-        this.id = id;
-        this.name = name;
-        this.members = members;
-        this.retrospectives = retrospectives;
-    }
+    @ElementCollection
+    @CollectionTable(name = "team_member_names", joinColumns = @JoinColumn(name = "team_id"))
+    private List<String> members = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -68,19 +48,12 @@ public class Team {
         this.name = name;
     }
 
-    public List<TeamMember> getMembers() {
+    public List<String> getMembers() {
         return members;
     }
 
-    public void setMembers(List<TeamMember> members) {
+    public void setMembers(List<String> members) {
         this.members = members;
     }
 
-    public List<Retrospective> getRetrospectives() {
-        return retrospectives;
-    }
-
-    public void setRetrospectives(List<Retrospective> retrospectives) {
-        this.retrospectives = retrospectives;
-    }
 }

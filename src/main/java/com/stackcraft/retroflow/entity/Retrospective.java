@@ -1,71 +1,42 @@
 package com.stackcraft.retroflow.entity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
+/**
+ * STUB — left behind by the previous vendor.
+ *
+ * A Retrospective belongs to a Team, has a title, a date, and a status
+ * (OPEN or CLOSED). A team can have multiple retrospectives but only one
+ * OPEN at a time; once closed, a retrospective can never be reopened. See
+ * the RetroFlow brief for the full requirements — fields, the status
+ * enum, and the relationship to Team still need to be designed and
+ * implemented.
+ */
 @Entity
-@Table(name = "retrospectives")
 public class Retrospective {
+
+    public enum Status {
+        OPEN,
+        CLOSED
+    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(max = 255)
-    @Column(nullable = false, length = 255)
     private String title;
 
-    @NotNull
-    @Column(nullable = false)
-    private LocalDate date = LocalDate.now();
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
-    private RetrospectiveStatus status = RetrospectiveStatus.OPEN;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "team_id", nullable = false)
+    @ManyToOne(optional = false)
     private Team team;
 
-    @Valid
-    @OneToMany(mappedBy = "retrospective", fetch = FetchType.LAZY,
-            cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private List<FeedbackItem> feedbackItems = new ArrayList<>();
-
-    public Retrospective() {
-    }
-
-    public Retrospective(Long id, String title, LocalDate date, RetrospectiveStatus status,
-                         Team team, List<FeedbackItem> feedbackItems) {
-        this.id = id;
-        this.title = title;
-        this.date = date;
-        this.status = status;
-        this.team = team;
-        this.feedbackItems = feedbackItems;
-    }
+    @Enumerated(EnumType.STRING)
+    private Status status = Status.OPEN;
 
     public Long getId() {
         return id;
@@ -83,22 +54,6 @@ public class Retrospective {
         this.title = title;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public RetrospectiveStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(RetrospectiveStatus status) {
-        this.status = status;
-    }
-
     public Team getTeam() {
         return team;
     }
@@ -107,11 +62,12 @@ public class Retrospective {
         this.team = team;
     }
 
-    public List<FeedbackItem> getFeedbackItems() {
-        return feedbackItems;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setFeedbackItems(List<FeedbackItem> feedbackItems) {
-        this.feedbackItems = feedbackItems;
+    public void setStatus(Status status) {
+        this.status = status;
     }
+
 }

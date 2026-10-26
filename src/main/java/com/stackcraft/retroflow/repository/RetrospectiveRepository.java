@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * OPEN retrospective for a team).
  */
 public interface RetrospectiveRepository extends JpaRepository<Retrospective, Long> {
+
+	boolean existsByTeam_IdAndStatus(Long teamId, Retrospective.Status status);
 }

@@ -1,11 +1,10 @@
 package com.stackcraft.retroflow.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.NotNull;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
 
 /**
  * STUB — left behind by the previous vendor.
@@ -22,40 +21,53 @@ import jakarta.validation.constraints.NotNull;
  * been decided yet; this is deliberately just a bare stub.
  */
 @Entity
-@DiscriminatorValue("ACTION_ITEM")
-public class ActionItem extends FeedbackItem {
+public class ActionItem {
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(length = 20)
-    private ActionPriority priority;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(nullable = false)
-    private boolean completed = false;
+    private String description;
 
-    public ActionItem() {
+    private String priority;
+
+    private String assignee;
+
+    private boolean completed;
+
+    @ManyToOne(optional = false)
+    private Retrospective retrospective;
+
+    public Long getId() {
+        return id;
     }
 
-    public ActionItem(Long id, String content, TeamMember submitter, Retrospective retrospective,
-                      ActionPriority priority, boolean completed) {
-        super(id, content, FeedbackType.ACTION_ITEM, submitter, retrospective);
-        this.priority = priority;
-        this.completed = completed;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public ActionItem(Long id, String content, FeedbackType type, TeamMember submitter,
-                      Retrospective retrospective, ActionPriority priority, boolean completed) {
-        super(id, content, type, submitter, retrospective);
-        this.priority = priority;
-        this.completed = completed;
+    public String getDescription() {
+        return description;
     }
 
-    public ActionPriority getPriority() {
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getPriority() {
         return priority;
     }
 
-    public void setPriority(ActionPriority priority) {
+    public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 
     public boolean isCompleted() {
@@ -65,4 +77,13 @@ public class ActionItem extends FeedbackItem {
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
+
+    public Retrospective getRetrospective() {
+        return retrospective;
+    }
+
+    public void setRetrospective(Retrospective retrospective) {
+        this.retrospective = retrospective;
+    }
+
 }
