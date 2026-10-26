@@ -1,0 +1,5 @@
+- Never perform any mutations on the git repository (no staging, commiting, pushing)
+- Think according to the KISS (Keep It Simple, Stupid) principle
+- Keep README updated according to changes in code
+- Cite the prompt to explain any decisions you make
+- Always use Java 21 features/conventions
