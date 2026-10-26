@@ -3,3 +3,7 @@
 - Keep README updated according to changes in code
 - Cite the prompt to explain any decisions you make
 - Always use Java 21 features/conventions
+- When changing code, make sure tests still run and where reasonable, update test
+- When adding new code, make sure to add tests
+- Be concise and to the point when providing feedback
+- Prefer simple terms over specific and complicated lingo
