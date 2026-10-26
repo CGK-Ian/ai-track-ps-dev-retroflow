@@ -2,6 +2,7 @@ package com.stackcraft.retroflow.repository;
 
 import com.stackcraft.retroflow.entity.Retrospective;
 import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
 /**
  * STUB — left behind by the previous vendor.
@@ -11,4 +12,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * OPEN retrospective for a team).
  */
 public interface RetrospectiveRepository extends JpaRepository<Retrospective, Long> {
+	List<Retrospective> findByTeam_IdAndStatus(Long teamId, String status);
 }
