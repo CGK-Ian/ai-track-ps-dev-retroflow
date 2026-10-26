@@ -21,10 +21,10 @@ RUN apt-get update \
     && useradd --system --gid spring --create-home --home-dir /app spring
 
 WORKDIR /app
+RUN mkdir -p /app && chown -R spring:spring /app
 
-# Copy the jar built in the previous stage.
-COPY --from=builder /workspace/target/*.jar /app/app.jar
-RUN chown -R spring:spring /app
+# Copy the jar built in the previous stage with explicit ownership for the non-root runtime user.
+COPY --chown=spring:spring --from=builder /workspace/target/*.jar /app/app.jar
 
 USER spring
 
