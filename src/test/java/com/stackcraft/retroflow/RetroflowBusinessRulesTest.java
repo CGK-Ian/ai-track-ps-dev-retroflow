@@ -40,9 +40,12 @@ class RetroflowBusinessRulesTest {
         Retrospective retro = retrospectiveService.createRetrospective(team.getId(), "Sprint 1 Retro");
 
         // Act
-        retrospectiveService.closeRetrospective(retro.getId());
+        Retrospective closed = retrospectiveService.closeRetrospective(retro.getId());
 
         // Assert
+        assertThat(closed.getId()).isEqualTo(retro.getId());
+        assertThat(closed.getTeam().getId()).isEqualTo(team.getId());
+        assertThat(closed.getStatus()).isEqualTo(Retrospective.Status.CLOSED);
         assertThatThrownBy(() ->
             retrospectiveService.addFeedbackItem(retro.getId(), "It went well", "WENT_WELL", "Alice")
         ).isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class);
@@ -68,9 +71,12 @@ class RetroflowBusinessRulesTest {
         ActionItem actionItem = retrospectiveService.addActionItem(retro.getId(), "Fix the build", "HIGH", "Eve");
 
         // Act
-        retrospectiveService.completeActionItem(actionItem.getId());
+        ActionItem completed = retrospectiveService.completeActionItem(actionItem.getId());
 
         // Assert
+        assertThat(completed.getId()).isEqualTo(actionItem.getId());
+        assertThat(completed.getRetrospective().getId()).isEqualTo(retro.getId());
+        assertThat(completed.isCompleted()).isTrue();
         assertThatThrownBy(() ->
             retrospectiveService.uncompleteActionItem(actionItem.getId())
         ).isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class);
@@ -85,6 +91,7 @@ class RetroflowBusinessRulesTest {
         assertThat(team.getMembers()).containsExactly("Grace", "Heidi");
         assertThat(retro.getTitle()).isEqualTo("Sprint 3 Retro");
         assertThat(retro.getTeam().getId()).isEqualTo(team.getId());
+        assertThat(retro.getStatus()).isEqualTo(Retrospective.Status.OPEN);
 
         FeedbackItem feedback = retrospectiveService.addFeedbackItem(
             retro.getId(), "Clear communication", "WENT_WELL", "Grace");
@@ -102,6 +109,46 @@ class RetroflowBusinessRulesTest {
         assertThat(actionItem.getAssignee()).isEqualTo("Heidi");
         assertThat(actionItem.isCompleted()).isFalse();
         assertThat(actionItem.getRetrospective().getId()).isEqualTo(retro.getId());
+    }
+
+    @Test
+    void uncompletingAnIncompleteActionItemKeepsItIncomplete() {
+        Team team = teamService.createTeam("Team Epsilon", java.util.List.of("Ivy", "Jules"));
+        Retrospective retro = retrospectiveService.createRetrospective(team.getId(), "Sprint 4 Retro");
+        ActionItem actionItem = retrospectiveService.addActionItem(retro.getId(), "Review the build", "LOW", "Ivy");
+
+        ActionItem unchanged = retrospectiveService.uncompleteActionItem(actionItem.getId());
+
+        assertThat(unchanged.getId()).isEqualTo(actionItem.getId());
+        assertThat(unchanged.getDescription()).isEqualTo("Review the build");
+        assertThat(unchanged.getPriority()).isEqualTo("LOW");
+        assertThat(unchanged.getAssignee()).isEqualTo("Ivy");
+        assertThat(unchanged.isCompleted()).isFalse();
+        assertThat(unchanged.getRetrospective().getId()).isEqualTo(retro.getId());
+    }
+
+    @Test
+    void missingTeamCannotCreateRetrospective() {
+        assertThatThrownBy(() -> retrospectiveService.createRetrospective(Long.MAX_VALUE, "Missing team retro"))
+            .isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class)
+            .hasMessageContaining("Team not found");
+    }
+
+    @Test
+    void missingRetrospectiveCannotBeClosed() {
+        assertThatThrownBy(() -> retrospectiveService.closeRetrospective(Long.MAX_VALUE))
+            .isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class)
+            .hasMessageContaining("Retrospective not found");
+    }
+
+    @Test
+    void missingActionItemCannotBeCompletedOrUncompleted() {
+        assertThatThrownBy(() -> retrospectiveService.completeActionItem(Long.MAX_VALUE))
+            .isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class)
+            .hasMessageContaining("Action item not found");
+        assertThatThrownBy(() -> retrospectiveService.uncompleteActionItem(Long.MAX_VALUE))
+            .isInstanceOf(com.stackcraft.retroflow.exception.RetroflowException.class)
+            .hasMessageContaining("Action item not found");
     }
 
 }

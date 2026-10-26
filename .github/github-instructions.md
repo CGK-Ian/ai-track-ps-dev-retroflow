@@ -2,7 +2,7 @@
 - Think according to the KISS (Keep It Simple, Stupid) principle
 - Keep README updated according to changes in code
 - Cite the prompt to explain any decisions you make
-- Always use Java 21 features/conventions
+- Use Java 21
 - When changing code, make sure tests still run and where reasonable, update test
 - When adding new code, make sure to add tests
 - Be concise and to the point when providing feedback
