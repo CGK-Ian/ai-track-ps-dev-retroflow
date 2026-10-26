@@ -39,6 +39,7 @@ This document records the decisions made to resolve ambiguities in the RetroFlow
 - If both action-item filters (priority and completed status) are supplied, both filters apply (`AND` semantics).
 - Use standard REST naming conventions for controller paths.
 - Return `404 Not Found` when a requested record does not exist. Return `400 Bad Request` for other functional errors.
+- A business rule violation (for example closing an already closed retrospective, or creating a second open retrospective) returns `400 Bad Request` with the `BUSINESS_RULE_VIOLATION` error code.
 - Errors use a standard `ErrorMessage` response object containing a code and description.
 
 ## Persistence and Documentation
