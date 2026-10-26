@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Column;
 
 /**
  * STUB — left behind by the previous vendor.
@@ -34,6 +35,9 @@ public class ActionItem {
     private String assignee;
 
     private boolean completed;
+
+    @Column(unique = true)
+    private Long feedbackItemId;
 
     @ManyToOne(optional = false)
     private Retrospective retrospective;
@@ -76,6 +80,14 @@ public class ActionItem {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public Long getFeedbackItemId() {
+        return feedbackItemId;
+    }
+
+    public void setFeedbackItemId(Long feedbackItemId) {
+        this.feedbackItemId = feedbackItemId;
     }
 
     public Retrospective getRetrospective() {

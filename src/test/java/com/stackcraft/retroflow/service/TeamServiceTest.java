@@ -116,6 +116,7 @@ class TeamServiceTest {
     @Test
     void createTeam_rejectsDuplicateTeamNames() {
         when(teamRepository.save(any(Team.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(teamRepository.existsByName("Team-Alpha")).thenReturn(false, true);
         teamService.createTeam("Team-Alpha", List.of("Alice"));
 
         assertThatThrownBy(() -> teamService.createTeam("Team-Alpha", List.of("Bob")))

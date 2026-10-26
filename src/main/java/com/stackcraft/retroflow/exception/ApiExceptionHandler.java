@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.NoSuchElementException;
+import java.time.Instant;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
@@ -27,12 +28,12 @@ public class ApiExceptionHandler {
                 .map(this::formatFieldError)
                 .distinct()
                 .collect(Collectors.joining("; "));
-        return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", description);
+        return error(HttpStatus.BAD_REQUEST, description);
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorMessage> handleConstraintViolation(ConstraintViolationException exception) {
-        return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", exception.getMessage());
+        return error(HttpStatus.BAD_REQUEST, "Invalid request");
     }
 
     @ExceptionHandler({HttpMessageNotReadableException.class,
@@ -40,34 +41,35 @@ public class ApiExceptionHandler {
             MissingServletRequestParameterException.class,
             HandlerMethodValidationException.class})
     public ResponseEntity<ErrorMessage> handleBadRequest(Exception exception) {
-        return error(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", "Invalid request: " + exception.getMessage());
+        return error(HttpStatus.BAD_REQUEST, "Invalid request");
     }
 
     @ExceptionHandler(RetroflowException.class)
     public ResponseEntity<ErrorMessage> handleBusinessRule(RetroflowException exception) {
-        return error(HttpStatus.BAD_REQUEST, "BUSINESS_RULE_VIOLATION", exception.getMessage());
+        return error(HttpStatus.CONFLICT, exception.getMessage());
     }
 
     @ExceptionHandler({NotFoundException.class, EntityNotFoundException.class, NoSuchElementException.class})
     public ResponseEntity<ErrorMessage> handleNotFound(RuntimeException exception) {
-        return error(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage());
+        return error(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorMessage> handleDataConflict(DataIntegrityViolationException exception) {
-        return error(HttpStatus.BAD_REQUEST, "DATA_CONFLICT", "The request conflicts with existing data");
+        return error(HttpStatus.CONFLICT, "The request conflicts with existing data");
     }
 
     @ExceptionHandler(UnsupportedOperationException.class)
     public ResponseEntity<ErrorMessage> handleNotImplemented(UnsupportedOperationException exception) {
-        return error(HttpStatus.NOT_IMPLEMENTED, "NOT_IMPLEMENTED", exception.getMessage());
+        return error(HttpStatus.NOT_IMPLEMENTED, exception.getMessage());
     }
 
     private String formatFieldError(FieldError error) {
         return error.getField() + ": " + error.getDefaultMessage();
     }
 
-    private ResponseEntity<ErrorMessage> error(HttpStatus status, String code, String description) {
-        return ResponseEntity.status(status).body(new ErrorMessage(code, description));
+    private ResponseEntity<ErrorMessage> error(HttpStatus status, String description) {
+        return ResponseEntity.status(status)
+                .body(new ErrorMessage(description, status.value(), Instant.now()));
     }
 }

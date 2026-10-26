@@ -7,6 +7,7 @@ import com.stackcraft.retroflow.entity.FeedbackItem;
 import com.stackcraft.retroflow.entity.Retrospective;
 import com.stackcraft.retroflow.entity.RetrospectiveStatus;
 import com.stackcraft.retroflow.entity.Team;
+import com.stackcraft.retroflow.entity.TeamMember;
 import com.stackcraft.retroflow.exception.RetroflowException;
 import jakarta.persistence.EntityNotFoundException;
 import com.stackcraft.retroflow.repository.ActionItemRepository;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +53,7 @@ class RetrospectiveServiceTest {
         team = new Team();
         team.setId(23L);
         team.setName("Team-Alpha");
+        team.setTeamMembers(List.of(new TeamMember(12L, "Alice", "alice@example.com", team)));
     }
 
     @Test
@@ -83,7 +86,7 @@ class RetrospectiveServiceTest {
         });
 
         RetrospectiveResponse created = retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, null));
+            23L, new CreateRetrospectiveRequest("Sprint 1", null, "alice@example.com"));
 
         assertThat(created).isEqualTo(new RetrospectiveResponse(
             41L, "Sprint 1", LocalDate.now(), RetrospectiveStatus.OPEN, 23L));
@@ -103,7 +106,7 @@ class RetrospectiveServiceTest {
             LocalDate.now().minusDays(10), LocalDate.now(), LocalDate.now().plusDays(10)
         }) {
             RetrospectiveResponse created = retrospectiveService.createRetrospective(
-                23L, new CreateRetrospectiveRequest("Sprint 1", date, null));
+                23L, new CreateRetrospectiveRequest("Sprint 1", date, "alice@example.com"));
 
             assertThat(created.date()).isEqualTo(date);
             assertThat(created.title()).isEqualTo("Sprint 1");
@@ -112,13 +115,13 @@ class RetrospectiveServiceTest {
     }
 
     @Test
-    void createRetrospectiveRequest_acceptsStatusWithoutCaseSensitivity() {
+    void createRetrospectiveRequest_acceptsTeamMemberEmail() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
         when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
         when(retrospectiveRepository.save(any(Retrospective.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         RetrospectiveResponse created = retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", LocalDate.of(2026, 10, 26), "open"));
+            23L, new CreateRetrospectiveRequest("Sprint 1", LocalDate.of(2026, 10, 26), "ALICE@example.com"));
 
         assertThat(created.status()).isEqualTo(RetrospectiveStatus.OPEN);
         assertThat(created.date()).isEqualTo(LocalDate.of(2026, 10, 26));
@@ -126,24 +129,12 @@ class RetrospectiveServiceTest {
     }
 
     @Test
-    void createRetrospectiveRequest_rejectsUnknownStatus() {
+    void createRetrospectiveRequest_rejectsEmailNotOnTeam() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
         when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, "UNKNOWN")))
-            .isInstanceOf(RetroflowException.class);
-
-        verify(retrospectiveRepository, never()).save(any(Retrospective.class));
-    }
-
-    @Test
-    void createRetrospectiveRequest_rejectsInitialClosedStatus() {
-        when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
-        when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
-
-        assertThatThrownBy(() -> retrospectiveService.createRetrospective(
-            23L, new CreateRetrospectiveRequest("Sprint 1", null, "CLOSED")))
+            23L, new CreateRetrospectiveRequest("Sprint 1", null, "stranger@example.com")))
             .isInstanceOf(RetroflowException.class);
 
         verify(retrospectiveRepository, never()).save(any(Retrospective.class));
@@ -155,14 +146,13 @@ class RetrospectiveServiceTest {
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(404L, "Sprint 1"))
             .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Team not found");
+            .hasMessageContaining("Team 404: not found");
         verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
 
     @Test
     void createRetrospective_rejectsBlankTitle() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
-        when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(23L, " \t "))
             .isInstanceOf(RetroflowException.class)
@@ -199,7 +189,6 @@ class RetrospectiveServiceTest {
     @Test
     void createRetrospective_rejectsTitlesLongerThan255Characters() {
         when(teamRepository.findById(23L)).thenReturn(Optional.of(team));
-        when(retrospectiveRepository.existsByTeam_IdAndStatus(23L, Retrospective.Status.OPEN)).thenReturn(false);
 
         assertThatThrownBy(() -> retrospectiveService.createRetrospective(23L, "A".repeat(256)))
             .isInstanceOf(RetroflowException.class);
@@ -249,7 +238,7 @@ class RetrospectiveServiceTest {
 
         assertThatThrownBy(() -> retrospectiveService.closeRetrospective(404L))
             .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Retrospective not found");
+            .hasMessageContaining("Retrospective 404: retrospective not found");
         verify(retrospectiveRepository, never()).save(any(Retrospective.class));
     }
 
@@ -303,7 +292,7 @@ class RetrospectiveServiceTest {
 
         assertThatThrownBy(() -> retrospectiveService.addFeedbackItem(404L, "Text", "WENT_WELL", "Alice"))
             .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Retrospective not found");
+            .hasMessageContaining("Retrospective 404: retrospective not found");
         verify(feedbackItemRepository, never()).save(any(FeedbackItem.class));
     }
 

@@ -123,7 +123,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void createTeam_duplicateTeamName_returns400BusinessRule() throws Exception {
+    void createTeam_duplicateTeamName_returns409Conflict() throws Exception {
         when(teamService.createTeam(any(CreateTeamRequest.class)))
                 .thenThrow(new RetroflowException("Team name already exists"));
 
@@ -131,7 +131,7 @@ class TeamControllerTest {
     }
 
     @Test
-    void createTeam_duplicateMemberEmail_returns400BusinessRule() throws Exception {
+    void createTeam_duplicateMemberEmail_returns409Conflict() throws Exception {
         when(teamService.createTeam(any(CreateTeamRequest.class)))
                 .thenThrow(new RetroflowException("Duplicate member email"));
         Map<String, Object> body = with(validTeam(), "members",
@@ -147,8 +147,9 @@ class TeamControllerTest {
 
         createTeam(json(validTeam()))
                 .andExpect(status().isNotImplemented())
-                .andExpect(jsonPath("$.code").value("NOT_IMPLEMENTED"))
-                .andExpect(jsonPath("$.description").value("Team creation has not been implemented yet"));
+                .andExpect(jsonPath("$.error").value("Team creation has not been implemented yet"))
+                .andExpect(jsonPath("$.status").value(501))
+                .andExpect(jsonPath("$.timestamp").isNotEmpty());
     }
 
     // ---- #2 GET /api/teams ----

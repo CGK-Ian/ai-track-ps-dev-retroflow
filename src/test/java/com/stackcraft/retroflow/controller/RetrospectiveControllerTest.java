@@ -150,7 +150,7 @@ class RetrospectiveControllerTest {
     }
 
     @Test
-    void createRetrospective_secondOpenRetrospective_returns400BusinessRule() throws Exception {
+    void createRetrospective_secondOpenRetrospective_returns409Conflict() throws Exception {
         when(retrospectiveService.createRetrospective(eq(7L), any(CreateRetrospectiveRequest.class)))
                 .thenThrow(new RetroflowException("Team already has an open retrospective"));
 
@@ -159,7 +159,7 @@ class RetrospectiveControllerTest {
     }
 
     @Test
-    void createRetrospective_emailNotOnRoster_returns400BusinessRule() throws Exception {
+    void createRetrospective_emailNotOnRoster_returns409Conflict() throws Exception {
         when(retrospectiveService.createRetrospective(eq(7L), any(CreateRetrospectiveRequest.class)))
                 .thenThrow(new RetroflowException("Email is not a member of the team"));
 
@@ -223,7 +223,7 @@ class RetrospectiveControllerTest {
     }
 
     @Test
-    void listRetrospectivesForTeam_emailNotOnRoster_returns400BusinessRule() throws Exception {
+    void listRetrospectivesForTeam_emailNotOnRoster_returns409Conflict() throws Exception {
         when(retrospectiveService.getRetrospectivesForTeam(anyLong(), anyString(), anyInt(), anyInt()))
                 .thenThrow(new RetroflowException("Email is not a member of the team"));
 
@@ -363,7 +363,7 @@ class RetrospectiveControllerTest {
     }
 
     @Test
-    void closeRetrospective_alreadyClosed_returns400BusinessRule() throws Exception {
+    void closeRetrospective_alreadyClosed_returns409Conflict() throws Exception {
         doThrow(new RetroflowException("Retrospective is already closed"))
                 .when(retrospectiveService).closeRetrospective(5L, EMAIL);
 
@@ -372,7 +372,7 @@ class RetrospectiveControllerTest {
     }
 
     @Test
-    void closeRetrospective_emailNotOnRoster_returns400BusinessRule() throws Exception {
+    void closeRetrospective_emailNotOnRoster_returns409Conflict() throws Exception {
         doThrow(new RetroflowException("Email is not a member of the team"))
                 .when(retrospectiveService).closeRetrospective(5L, EMAIL);
 

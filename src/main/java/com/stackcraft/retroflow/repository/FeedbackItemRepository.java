@@ -1,6 +1,8 @@
 package com.stackcraft.retroflow.repository;
 
 import com.stackcraft.retroflow.entity.FeedbackItem;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -11,4 +13,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * retrospective, or filtering action items by priority/completed status).
  */
 public interface FeedbackItemRepository extends JpaRepository<FeedbackItem, Long> {
+
+    Page<FeedbackItem> findByRetrospective_Id(Long retrospectiveId, Pageable pageable);
+
+    java.util.List<FeedbackItem> findAllByRetrospective_Id(Long retrospectiveId);
+
+    java.util.Optional<FeedbackItem> findByIdAndRetrospective_Id(Long id, Long retrospectiveId);
 }

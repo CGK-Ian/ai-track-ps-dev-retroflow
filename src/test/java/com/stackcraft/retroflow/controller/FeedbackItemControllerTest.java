@@ -182,7 +182,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void createFeedbackItem_closedRetrospective_returns400BusinessRule() throws Exception {
+    void createFeedbackItem_closedRetrospective_returns409Conflict() throws Exception {
         when(feedbackItemService.createFeedbackItem(eq(5L), any(CreateFeedbackItemRequest.class)))
                 .thenThrow(new RetroflowException("Cannot modify a closed retrospective"));
 
@@ -190,7 +190,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void createFeedbackItem_submitterNotOnRoster_returns400BusinessRule() throws Exception {
+    void createFeedbackItem_submitterNotOnRoster_returns409Conflict() throws Exception {
         when(feedbackItemService.createFeedbackItem(eq(5L), any(CreateFeedbackItemRequest.class)))
                 .thenThrow(new RetroflowException("Email is not a member of the team"));
 
@@ -394,7 +394,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void updateFeedbackItem_completedActionItem_returns400BusinessRule() throws Exception {
+    void updateFeedbackItem_completedActionItem_returns409Conflict() throws Exception {
         when(feedbackItemService.updateFeedbackItem(eq(5L), eq(2L), any(UpdateFeedbackItemRequest.class)))
                 .thenThrow(new RetroflowException("A completed action item cannot be edited"));
 
@@ -402,7 +402,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void updateFeedbackItem_emailNotOnRoster_returns400BusinessRule() throws Exception {
+    void updateFeedbackItem_emailNotOnRoster_returns409Conflict() throws Exception {
         when(feedbackItemService.updateFeedbackItem(eq(5L), eq(2L), any(UpdateFeedbackItemRequest.class)))
                 .thenThrow(new RetroflowException("Email is not a member of the team"));
 
@@ -410,7 +410,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void updateFeedbackItem_nonActionItemOnClosedRetrospective_returns400BusinessRule() throws Exception {
+    void updateFeedbackItem_nonActionItemOnClosedRetrospective_returns409Conflict() throws Exception {
         when(feedbackItemService.updateFeedbackItem(eq(5L), eq(1L), any(UpdateFeedbackItemRequest.class)))
                 .thenThrow(new RetroflowException("Cannot modify a closed retrospective"));
 
@@ -470,7 +470,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void deleteFeedbackItem_closedRetrospective_returns400BusinessRule() throws Exception {
+    void deleteFeedbackItem_closedRetrospective_returns409Conflict() throws Exception {
         doThrow(new RetroflowException("Cannot modify a closed retrospective"))
                 .when(feedbackItemService).deleteFeedbackItem(5L, 2L, EMAIL);
 
@@ -515,7 +515,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void completeActionItem_notAnActionItem_returns400BusinessRule() throws Exception {
+    void completeActionItem_notAnActionItem_returns409Conflict() throws Exception {
         when(feedbackItemService.completeActionItem(5L, 1L, EMAIL))
                 .thenThrow(new RetroflowException("Only action items can be completed"));
 
@@ -524,7 +524,7 @@ class FeedbackItemControllerTest {
     }
 
     @Test
-    void completeActionItem_alreadyCompleted_returns400BusinessRule() throws Exception {
+    void completeActionItem_alreadyCompleted_returns409Conflict() throws Exception {
         when(feedbackItemService.completeActionItem(5L, 2L, EMAIL))
                 .thenThrow(new RetroflowException("Action item is already completed"));
 
@@ -532,4 +532,3 @@ class FeedbackItemControllerTest {
                 "already completed");
     }
 }
-
